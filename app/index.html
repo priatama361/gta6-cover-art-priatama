@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sunset Strip Studio — GTA-style cover maker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <h1>Sunset Strip Studio</h1>
+    <p>Turn your photos into a GTA-style multi-panel cover.</p>
+  </div>
+  <div class="top-actions">
+    <button id="exportBtn" class="primary" type="button">Export PNG</button>
+    <button id="exportAllBtn" type="button">Export all 3 PNGs</button>
+  </div>
+</header>
+
+<nav class="steps" id="stepsBar">
+  <button class="step" type="button" data-step="1"><span class="num">1</span> Add photos</button>
+  <span class="arrow">→</span>
+  <button class="step" type="button" data-step="2"><span class="num">2</span> Caption</button>
+  <span class="arrow">→</span>
+  <button class="step" type="button" data-step="3"><span class="num">3</span> Export PNG</button>
+  <span class="offline">Photos never leave this device — everything runs offline.</span>
+  <span class="history">
+    <button id="undoBtn" type="button" disabled>↩ Undo</button>
+    <button id="redoBtn" type="button" disabled>↪ Redo</button>
+  </span>
+</nav>
+
+<main class="layout" id="layout">
+  <section class="preview-wrap" id="previewWrap">
+    <canvas id="cover" width="1080" height="1080" aria-label="Cover preview"></canvas>
+    <p class="hint">Click a panel to select it. Drag a photo to pan, scroll to zoom, drag a
+    number badge onto another panel to swap. Drop a photo onto a panel to fill it.</p>
+  </section>
+
+  <aside class="controls" id="controls">
+    <section class="group">
+      <h2>Layout</h2>
+      <div class="seg" id="layoutSeg">
+        <button type="button" data-layout="mosaic" class="active">Cast Mosaic</button>
+        <button type="button" data-layout="strips">Diagonal Strips</button>
+        <button type="button" data-layout="sixgrid">Six Grid</button>
+        <button type="button" data-layout="masthead">Masthead</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Post size</h2>
+      <div class="seg" id="sizeSeg">
+        <button type="button" data-size="square" class="active">1:1 · 1080×1080</button>
+        <button type="button" data-size="portrait">4:5 · 1080×1350</button>
+        <button type="button" data-size="wide">16:9 · 1920×1080</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Colour grade</h2>
+      <div class="seg wrap" id="gradeSeg">
+        <button type="button" data-grade="sunset-gold" class="active">Sunset Gold</button>
+        <button type="button" data-grade="neon-night">Neon Night</button>
+        <button type="button" data-grade="tropic-teal">Tropic Teal</button>
+        <button type="button" data-grade="ultraviolet">Ultraviolet</button>
+        <button type="button" data-grade="retro-print">Retro Print</button>
+      </div>
+      <p class="note">The grade recolours the background, title and skyline — never your photos.</p>
+    </section>
+
+    <section class="group" id="captionGroup">
+      <h2>Caption</h2>
+      <label>Title
+        <input id="inTitle" type="text" value="MIDNIGHT DRIVE" maxlength="40">
+      </label>
+      <label>Title font
+        <select id="inTitleFont">
+          <option value="anton" selected>Anton</option>
+          <option value="saira">Saira Condensed Black</option>
+        </select>
+      </label>
+      <label>Script subtitle
+        <input id="inSubtitle" type="text" value="A Cover in Neon" maxlength="40">
+      </label>
+      <label>Script font
+        <select id="inScriptFont">
+          <option value="yellowtail" selected>Yellowtail</option>
+          <option value="pacifico">Pacifico</option>
+        </select>
+      </label>
+      <label>Kicker
+        <input id="inKicker" type="text" value="ONE LAST RIDE" maxlength="40">
+      </label>
+      <label>Tagline ribbon
+        <input id="inTagline" type="text" value="EVERY SUNSET HAS A PRICE" maxlength="60">
+      </label>
+      <label>Review quote
+        <input id="inQuote" type="text" value="THE DEFINITIVE NEON THRILLER" maxlength="60">
+      </label>
+      <label>Source
+        <input id="inPublication" type="text" value="SUNSET STRIP DAILY" maxlength="40">
+      </label>
+      <label>Billing (one credit per line — lowercase prints small)
+        <textarea id="inBilling" rows="4">A SUNSET STRIP STUDIO PRODUCTION
+MUSIC BY NEON COAST
+EDITED BY THE FIXER
+WRITTEN &amp; DIRECTED BY THE DRIVER</textarea>
+      </label>
+      <label>Seal
+        <input id="inSeal" type="text" value="BEST CAST" maxlength="24">
+      </label>
+      <label>Seal ring
+        <input id="inSealRing" type="text" value="SUNSET STRIP STUDIO • EST. 2026 •" maxlength="48">
+      </label>
+      <label>Release line
+        <input id="inRelease" type="text" value="COMING SOON" maxlength="30">
+      </label>
+      <label>Edition tag
+        <input id="inEdition" type="text" value="VOL. 1" maxlength="12">
+      </label>
+    </section>
+
+    <section class="group" id="panelsGroup">
+      <h2>Panels &amp; photos</h2>
+      <div class="row">
+        <button id="trySamplesBtn" type="button" class="primary">Try samples</button>
+        <button id="autoFillBtn" type="button">Auto-fill</button>
+      </div>
+      <p class="note">Try samples loads 8 example portraits and fills the name tags.
+      Auto-fill spreads your photos across all panels.</p>
+      <div class="panel-list" id="panelList"></div>
+      <div class="row">
+        <button id="prevPhotoBtn" type="button">◀ Photo</button>
+        <button id="nextPhotoBtn" type="button">Photo ▶</button>
+        <button id="flipBtn" type="button">Flip</button>
+      </div>
+      <label class="check"><input id="inNameTagsAuto" type="checkbox" checked> Name tags auto from photos</label>
+      <label>Role / name tag
+        <input id="inRole" type="text" value="THE DRIVER" maxlength="24" disabled>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+      <label class="upload">Add your photos
+        <input id="uploadInput" type="file" accept="image/*" multiple>
+      </label>
+      <div class="sliders">
+        <label>Zoom <span id="zoomVal">1.18×</span>
+          <input id="inZoom" type="range" min="0.8" max="2.5" step="0.05" value="1.18">
+        </label>
+        <label>Position X <span id="oxVal">0</span>
+          <input id="inOx" type="range" min="-0.5" max="0.5" step="0.02" value="0">
+        </label>
+        <label>Position Y <span id="oyVal">−0.10</span>
+          <input id="inOy" type="range" min="-0.5" max="0.5" step="0.02" value="-0.10">
+        </label>
+      </div>
+      <div class="row">
+        <button id="faceBtn" type="button">Face close-up</button>
+        <button id="resetPanelBtn" type="button">Reset panel</button>
+      </div>
+      <p class="note">Drag a panel's number badge onto another panel to swap them.
+      Drag a thumbnail onto the cover to fill a panel.</p>
+    </section>
+
+    <section class="group">
+      <h2>About</h2>
+      <p class="about">Sunset Strip Studio makes original poster art in the style of a
+      multi-panel game cover. All sample portraits were made with an image model;
+      fonts are Anton, Saira Condensed, Bebas Neue, Pacifico and Yellowtail under
+      the SIL Open Font License or the Apache License 2.0. Nothing here is
+      affiliated with or copied from any game. Your photos are processed in this
+      browser only — nothing is uploaded.</p>
+    </section>
+  </aside>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
